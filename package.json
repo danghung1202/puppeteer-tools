@@ -1,0 +1,17 @@
+{
+  "name": "puppeteer-tools",
+  "version": "1.0.0",
+  "description": "**bold text**",
+  "main": "test.js",
+  "dependencies": {
+    "pending-xhr-puppeteer": "^2.0.0",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
