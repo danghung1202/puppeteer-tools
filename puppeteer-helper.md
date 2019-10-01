@@ -12,7 +12,7 @@ This is why we introduced the ActionStack class which allows us to describe each
 1) it is clearer to the reader of the code what is happening and
 2) if the test fails, the error message says what the action was that failed instead of a generic timeout/Puppeteer API error, making the test much more debuggable.
 
-```
+```typescript
     export default class ActionStack {
         constructor() {
             this.actionsSoFar = [];
@@ -53,7 +53,7 @@ gives more context. And if the click fails, due to the button still being disabl
 
 ## Some Useful Helper Methods
 
-```
+```javascript
 module.exports = {
     click: async function(page, selector){
         try{

@@ -28,7 +28,7 @@ const {
     await page.waitForSelector('#form-login #username', {
         visible: true
     })
-    await page.type('#form-login #username', 'hung.dang@niteco.se')
+    await page.type('#form-login #username', 'your username')
 
     await page.click('#login-submit')
 
@@ -38,7 +38,7 @@ const {
         visible: true
     })
 
-    await page.type('#form-login #password', '02091945j')
+    await page.type('#form-login #password', 'your password')
 
     await page.click('#login-submit')
 
@@ -96,7 +96,7 @@ const {
     }
 
     await page.evaluate(() => {
-        document.querySelector('.search-container #advanced-search').value = 'project = BULL AND worklogAuthor = hung.dang AND worklogDate >= -7d AND worklogDate <= -1d  ORDER BY status ASC';
+        document.querySelector('.search-container #advanced-search').value = 'project = BULL AND worklogAuthor = hung.dang AND worklogDate >= -7d AND worklogDate <= -0d  ORDER BY status ASC';
     })
     await page.click('.search-container .search-options-container button')
     await pendingXHR.waitForAllXhrFinished();

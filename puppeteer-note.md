@@ -43,9 +43,11 @@ This method also uses a CSS selector to an element that one can type into, such 
 
 This method is used to click on an element specified by a CSS selector. In the example below it clicks the “Show all results” button on the Google developer page.
 
+```javascript
     const allResultsSelector = '.devsite-suggest-all-results';
     await page.waitForSelector(allResultsSelector);
     await page.click(allResultsSelector);
+```
 
 **$eval**
 
@@ -58,3 +60,69 @@ One of the most important ways we use `$eval` in the Accounts end-to-end tests i
 
 
 ## [How to bypass “Access Denied” pages when using Headless Chrome](https://medium.com/@jsoverson/how-to-bypass-access-denied-pages-with-headless-chrome-87ddd5f3413c)
+
+
+## [page.evaluate is your friend](https://docs.browserless.io/blog/2018/06/04/puppeteer-best-practices.html)
+
+For instance, instead of doing something like this (which has 3 async actions):
+
+```javascript
+    const $anchor = await page.$('a.buy-now');
+    const link = await $anchor.getProperty('href');
+    await $anchor.click();
+
+    return link;
+```
+
+Do this instead (1 async action)
+
+```javascript
+    await page.evaluate(() => {
+        const $anchor = document.querySelector('a.buy-now');
+        const text = $anchor.href;
+        $anchor.click();
+    });
+```
+
+## Parallelize with browsers, not pages
+
+Since we've determined that it's not good to run a browser, and that we should only run one when absolutely necessary, the next best-practice is to run only one session through each browser. While you actually might save some overhead by parallelizing work through pages, if one page crashes it can bring down the entire browser with it. That, plus each page isn't guaranteed to be totally clean (cookies and storage might bleed-through as seen here).
+
+Instead of this:
+
+```javascript
+    import puppeteer from 'puppeteer';
+
+    // Launch one browser and capture the promise
+    const launch = puppeteer.launch();
+
+    const runJob = async (url) {
+        // Re-use the browser here
+        const browser = await launch;
+        const page = await browser.newPage();
+        await page.goto(url);
+        const title = await page.title();
+
+        browser.close();
+
+        return title;
+    };
+```
+Do this:
+
+```javascript
+    import puppeteer from 'puppeteer';
+
+    const runJob = async (url) {
+        // Launch a clean browser for every "job"
+        const browser = puppeteer.launch();
+        const page = await browser.newPage();
+        await page.goto(url);
+        const title = await page.title();
+
+        browser.close();
+
+        return title;
+    };
+
+```

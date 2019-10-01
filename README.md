@@ -7,9 +7,12 @@ The tool to get and download all Quick And Snow radio show in [theoyeucau.com](h
 
 The show let me back to childhood
 
-## Facebook - Find the closed friends
+## Facebook - Find the friends who don't have any activities
 
 Find all friends who don't have any activities in period (1 year...) to have some action for them ex Unfriend, Unfollow,...
+
+## Facebook - Find who interested you
+
 
 ## Working on it
 
@@ -53,4 +56,6 @@ https://code.tutsplus.com/tutorials/the-30-css-selectors-you-must-memorize--net-
 * [Solving Captchas with Puppeteer](https://medium.com/@ofarukcaki/solving-captchas-with-puppeteer-8ce2521feb3b)
 * [Bypassing CAPTCHAs with Headless Chrome](https://medium.com/@jsoverson/bypassing-captchas-with-headless-chrome-93f294518337)
 * [How to bypass “slider CAPTCHA” with JS and Puppeteer](https://medium.com/@filipvitas/how-to-bypass-slider-captcha-with-js-and-puppeteer-cd5e28105e3c)
+
+
 

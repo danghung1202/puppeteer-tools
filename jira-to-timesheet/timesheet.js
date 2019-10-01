@@ -30,9 +30,9 @@ const {
         visible: true
     })
 
-    await page.type('#frmLogIn #UserName', 'hung.dang@niteco.se')
+    await page.type('#frmLogIn #UserName', 'your username')
 
-    await page.type('#frmLogIn #PassWord', '02091945')
+    await page.type('#frmLogIn #PassWord', 'your password')
 
     await page.click('#aLogin')
 
@@ -42,7 +42,7 @@ const {
 
     await page.waitFor(2000);
 
-    await page.goto('https://niteco.efficienttime.com/Entry/My?week=36&year=2019&cm=0&ht=0', {
+    await page.goto('https://niteco.efficienttime.com/Entry/My?week=39&year=2019&cm=0&ht=0', {
         waitUntil: 'domcontentloaded'
     })
 
@@ -66,8 +66,8 @@ const {
     await page.evaluate(() => {
 
         var swTasks = document.querySelectorAll('#dialog-workinghour .editor-form select')[1];
-        swTasks..querySelector('option[value="8d31334c-1791-437b-8305-8e1e525d97e7"]').selected = true;
-        swTasks..value = '8d31334c-1791-437b-8305-8e1e525d97e7'
+        swTasks.querySelector('option[value="8d31334c-1791-437b-8305-8e1e525d97e7"]').selected = true;
+        swTasks.value = '8d31334c-1791-437b-8305-8e1e525d97e7'
         // Create a new 'change' event
         var event = new Event('change');
         // Dispatch it.
@@ -80,34 +80,19 @@ const {
     await page.waitFor(4000);
 
     var myTasks = [{
-            issueKey: 'BULL-1910',
-            summary: 'BULL-479 Investigate and estimate story',
-            timespend: '4 hours'
+            issueKey: 'BULL-1998',
+            summary: 'API to get/update "Export Transaction" from EpiServer',
+            timespend: '2 days, 3 hours'
         },
         {
-            issueKey: 'BULL-633',
-            summary: 'Merge Main Branch into Bullion Branch',
-            timespend: '4 days, 5 hours'
+            issueKey: 'BULL-1014',
+            summary: 'Bullion Transaction History from AX',
+            timespend: '2 days'
         },
         {
-            issueKey: 'BULL-1920',
-            summary: 'BULL-940 Override Hephaestus Store Helper',
-            timespend: '1 day, 2 hours, 30 minutes'
-        },
-        {
-            issueKey: 'BULL-1909',
-            summary: 'BULL-1288 Optimzie import historic metal prices',
-            timespend: '7 hours'
-        },
-        {
-            issueKey: 'BULL-1904',
-            summary: 'BULL-1674 [Bug][PAMP] Can\'t checkout/sell back due to PAMP error',
-            timespend: '3 hours'
-        },
-        {
-            issueKey: 'BULL-1774',
-            summary: 'BULL-940 Currency in bullion category listing page is shown £ for a customer\' currency $',
-            timespend: '2 days, 1 hour'
+            issueKey: 'BULL-1013',
+            summary: 'Bullion Vault holdings (Portfolio) from AX',
+            timespend: '3 days, 3 hours, 15 minutes'
         }
     ];
 
