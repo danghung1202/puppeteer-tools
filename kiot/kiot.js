@@ -41,9 +41,9 @@ var download = function (uri, filename, callback) {
         visible: true
     })
 
-    await page.type('#UserName', '0984562829')
+    await page.type('#UserName', 'your username')
 
-    await page.type('#Password', '1234qwer!')
+    await page.type('#Password', 'your password')
 
     await page.click('#loginNewSale')
 
