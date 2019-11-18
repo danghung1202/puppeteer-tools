@@ -1,0 +1,12 @@
+{
+    "jira": {
+        "username": "your username",
+        "password": "your password",
+        "query": "project = BULL AND worklogAuthor = hung.dang AND worklogDate >= -7d AND worklogDate <= -0d  ORDER BY status ASC"
+    },
+    "timesheet": {
+        "username": "your username",
+        "password": "your password",
+        "week": "https://niteco.efficienttime.com/Entry/My"
+    }
+}

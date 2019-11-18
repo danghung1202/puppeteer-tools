@@ -6,6 +6,9 @@ const {
 const jsonIO = require('../helper/json-io');
 
 (async () => {
+    const config = await jsonIO.readJson('./config.json');
+    if (!config || !config.timesheet) return;
+
     const browser = await puppeteer.launch({
         ignoreHTTPSErrors: true,
         headless: false
@@ -32,9 +35,9 @@ const jsonIO = require('../helper/json-io');
         visible: true
     })
 
-    await page.type('#frmLogIn #UserName', 'your username')
+    await page.type('#frmLogIn #UserName', config.timesheet.username)
 
-    await page.type('#frmLogIn #PassWord', 'your password')
+    await page.type('#frmLogIn #PassWord', config.timesheet.password)
 
     await page.click('#aLogin')
 
@@ -44,7 +47,7 @@ const jsonIO = require('../helper/json-io');
 
     await page.waitFor(2000);
 
-    await page.goto('https://niteco.efficienttime.com/Entry/My?week=39&year=2019&cm=0&ht=0', {
+    await page.goto(config.timesheet.week, {
         waitUntil: 'domcontentloaded'
     })
 
@@ -94,13 +97,15 @@ const jsonIO = require('../helper/json-io');
             // Dispatch it.
             swTasks.dispatchEvent(event);
 
-            document.querySelector('#dialog-workinghour .editor-form #SubTask').value = task.summary;
+            var taskName = task.issueKey + ' ' + task.summary;
+
+            document.querySelector('#dialog-workinghour .editor-form #SubTask').value = taskName.slice(0, 98);
             document.querySelectorAll('#dialog-workinghour .editor-form .button_row a')[1].click();
         }, myTasks[i]);
-        await page.waitFor(4000);
+        await page.waitFor(2000);
     }
 
-    await page.waitFor(4000);
+    await page.waitFor(2000);
     await page.evaluate(() => {
         document.querySelectorAll('#dialog-workinghour .editor-form .button_row a')[2].click();
     })
@@ -109,13 +114,27 @@ const jsonIO = require('../helper/json-io');
         document.querySelector('.time-sheet tr.controls a.save').click();
     })
 
-    // await pendingXHR.waitForAllXhrFinished();
-    // await navigationPromise
+    await pendingXHR.waitForAllXhrFinished();
+    await navigationPromise
 
-    // await page.screenshot({
-    //     path: 'timesheet.png',
-    //     fullPage: true
-    // })
+    //Retry three times
+    // for (var i = 0; i < 3; i++) {
+    //     await page.evaluate(() => {
+    //         document.querySelector('.time-sheet tr.controls a.save').click();
+    //     })
+
+    //     await pendingXHR.waitForAllXhrFinished();
+    //     // await page.waitForSelector('#lblRemindInfo', {
+    //     //     visible: true
+    //     // });
+
+    //     var isSuccess = await page.evaluate(() => {
+    //         var innerText = document.querySelector('#lblRemindInfo').innerText;
+    //         return innerText === 'Your timesheet was saved successfully'
+    //     })
+
+    //     if (isSuccess) break;
+    // }
 
     await browser.close()
 })()

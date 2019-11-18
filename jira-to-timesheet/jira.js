@@ -6,6 +6,9 @@ const {
 const jsonIO = require('../helper/json-io');
 
 (async () => {
+    const config = await jsonIO.readJson('./config.json');
+    if (!config || !config.jira) return;
+
     const browser = await puppeteer.launch({
         headless: false
     })
@@ -30,7 +33,7 @@ const jsonIO = require('../helper/json-io');
     await page.waitForSelector('#form-login #username', {
         visible: true
     })
-    await page.type('#form-login #username', 'your username')
+    await page.type('#form-login #username', config.jira.username)
 
     await page.click('#login-submit')
 
@@ -40,7 +43,7 @@ const jsonIO = require('../helper/json-io');
         visible: true
     })
 
-    await page.type('#form-login #password', 'your password')
+    await page.type('#form-login #password', config.jira.password)
 
     await page.click('#login-submit')
 
@@ -54,18 +57,6 @@ const jsonIO = require('../helper/json-io');
 
     await page.waitFor(2000);
 
-    // await page.evaluate(() => {
-    //     document.querySelector('#navigation-app #quickSearchGlobalItem').click();
-    // })
-
-    // await pendingXHR.waitForAllXhrFinished();
-
-    // await page.waitFor(1000);
-
-    // await page.evaluate(() => {
-    //     document.querySelector('a.jvwfrr').click();
-    // })
-
     await page.goto('https://maginus.atlassian.net/issues/?jql=order%20by%20created%20DESC', {
         waitUntil: 'domcontentloaded'
     })
@@ -78,13 +69,11 @@ const jsonIO = require('../helper/json-io');
     })
 
     //Check textarea advanced-search is visible and available
-    var isAdvancedSearchVisible = await page.evaluate(() => {
+    const isAdvancedSearchVisible = await page.evaluate(() => {
         let textarea = document.querySelector('.search-container #advanced-search');
         if (textarea) return true;
         return false;
     })
-
-    console.log(isAdvancedSearchVisible);
 
     if (!isAdvancedSearchVisible) {
         await page.evaluate(() => {
@@ -97,15 +86,16 @@ const jsonIO = require('../helper/json-io');
         })
     }
 
-    await page.evaluate(() => {
-        document.querySelector('.search-container #advanced-search').value = 'project = BULL AND worklogAuthor = hung.dang AND worklogDate >= -7d AND worklogDate <= -0d  ORDER BY status ASC';
-    })
+    await page.evaluate((query) => {
+        document.querySelector('.search-container #advanced-search').value = query;
+    }, config.jira.query);
+
     await page.click('.search-container .search-options-container button')
     await pendingXHR.waitForAllXhrFinished();
     await page.waitFor(1000);
 
 
-    var result = await page.evaluate(() => {
+    const result = await page.evaluate(() => {
         var rows = Array.from(document.querySelectorAll('#issuetable tbody tr'));
         var jsonResults = []
         rows.forEach(tr => {
@@ -122,7 +112,6 @@ const jsonIO = require('../helper/json-io');
         return jsonResults;
     })
 
-    //console.log(result);
     var success = await jsonIO.writeJson('tasks.json', result);
     console.log(success);
     await browser.close()
