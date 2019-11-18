@@ -1,28 +1,30 @@
+const fs = require('fs');
 var request = require('request');
 
-
 module.exports = {
-    downloadFile: function (uri, filename, callback) {
+    downloadFileCallback: function (uri, filename, callback) {
         request.head(uri, function (err, res, body) {
             console.log('content-type:', res.headers['content-type']);
             console.log('content-length:', res.headers['content-length']);
-            request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+            request(uri).pipe(fs.createWriteStream(filename)).on('finish', callback);
         });
     },
 
-    downloadFileAsync: function (uri, filename) {
+    downloadFile: function (uri, filename) {
         return new Promise((resolve, reject) => {
             request.head(uri, function (err, res, body) {
-                if (err) reject(err);
-                else
+                if (err) {
+                    reject(err);
+                } else {
                     request(uri)
-                    .pipe(fs.createWriteStream(filename))
-                    .on('finish', () => {
-                        resolve();
-                    })
-                    .on('error', (error) => {
-                        reject(error);
-                    })
+                        .pipe(fs.createWriteStream(filename))
+                        .on('finish', () => {
+                            resolve(true);
+                        })
+                        .on('error', (error) => {
+                            reject(error);
+                        })
+                }
             });
         });
     }
