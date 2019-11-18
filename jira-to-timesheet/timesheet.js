@@ -3,6 +3,8 @@ const {
     PendingXHR
 } = require('pending-xhr-puppeteer');
 
+const jsonIO = require('../helper/json-io');
+
 (async () => {
     const browser = await puppeteer.launch({
         ignoreHTTPSErrors: true,
@@ -77,24 +79,9 @@ const {
         document.querySelectorAll('#dialog-workinghour .editor-form .button_row a')[1].click();
     })
 
-    await page.waitFor(4000);
+    await page.waitFor(2000);
 
-    var myTasks = [{
-            issueKey: 'BULL-1998',
-            summary: 'API to get/update "Export Transaction" from EpiServer',
-            timespend: '2 days, 3 hours'
-        },
-        {
-            issueKey: 'BULL-1014',
-            summary: 'Bullion Transaction History from AX',
-            timespend: '2 days'
-        },
-        {
-            issueKey: 'BULL-1013',
-            summary: 'Bullion Vault holdings (Portfolio) from AX',
-            timespend: '3 days, 3 hours, 15 minutes'
-        }
-    ];
+    const myTasks = await jsonIO.readJson('tasks.json');
 
     for (var i = 0; i < myTasks.length; i++) {
         console.log(myTasks[i].summary);

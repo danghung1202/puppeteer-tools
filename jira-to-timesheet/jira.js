@@ -3,6 +3,8 @@ const {
     PendingXHR
 } = require('pending-xhr-puppeteer');
 
+const jsonIO = require('../helper/json-io');
+
 (async () => {
     const browser = await puppeteer.launch({
         headless: false
@@ -120,7 +122,8 @@ const {
         return jsonResults;
     })
 
-    console.log(result);
-
+    //console.log(result);
+    var success = await jsonIO.writeJson('tasks.json', result);
+    console.log(success);
     await browser.close()
 })()
