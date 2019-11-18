@@ -2,19 +2,8 @@ const puppeteer = require('puppeteer');
 const {
     PendingXHR
 } = require('pending-xhr-puppeteer');
-
-const fs = require('fs');
-var request = require('request');
-var path = require("path");
-
-//download function
-var download = function (uri, filename, callback) {
-    request.head(uri, function (err, res, body) {
-        console.log('content-type:', res.headers['content-type']);
-        console.log('content-length:', res.headers['content-length']);
-        request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-    });
-};
+const path = require("path");
+const fileDownload = require('../helper/file-download');
 
 (async () => {
     const browser = await puppeteer.launch({
@@ -77,9 +66,7 @@ var download = function (uri, filename, callback) {
     })
 
     console.log(downloadUrl);
-    await download(downloadUrl, path.basename(decodeURI(downloadUrl)), function () {
-        console.log('done');
-    });
+    const result = await fileDownload.downloadFile(downloadUrl, path.basename(decodeURI(downloadUrl)));
 
     await browser.close()
 })()
