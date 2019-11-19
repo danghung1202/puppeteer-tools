@@ -89,9 +89,16 @@ module.exports = {
     */
     mkdirRecursive: (path, options) => {
         return new Promise((resolve, reject) => {
-            if (options) Object.assign(options, {
-                recursive: true
-            })
+            if (options) {
+                options = Object.assign(options, {
+                    recursive: true
+                })
+            } else {
+                options = {
+                    recursive: true
+                }
+            }
+
             fs.mkdir(path, options, (err) => {
                 if (err) return reject(err);;
                 resolve(true);
