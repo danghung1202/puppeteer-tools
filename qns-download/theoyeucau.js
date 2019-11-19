@@ -4,6 +4,8 @@ const {
 } = require('pending-xhr-puppeteer');
 
 const path = require("path");
+const jsonIO = require('../helper/json-io');
+const fileIO = require('../helper/file-io');
 const fileDownload = require('../helper/file-download');
 
 (async () => {
@@ -12,12 +14,18 @@ const fileDownload = require('../helper/file-download');
     })
     const page = await browser.newPage();
     const pendingXHR = new PendingXHR(page);
+    const config = await jsonIO.readJson('./config.json');
+
+    if (!config || !config.url) return;
+
+    var isFolderExists = await fileIO.exists(config.folder);
+    if (!isFolderExists) await fileIO.mkdirRecursive(config.folder);
 
     await page.setViewport({
         width: 1280,
         height: 800
     })
-    await page.goto('https://www.theoyeucau.com/episode/sac-dep-va-giong-hat/', {
+    await page.goto(config.url, {
         waitUntil: 'domcontentloaded'
     })
 
@@ -39,7 +47,7 @@ const fileDownload = require('../helper/file-download');
         return audioSrc;
     });
 
-    console.log(musicUrls);
+    jsonIO.writeJson(`${config.folder}/playlist.json`, musicUrls);
 
     //// other way to get playlist url
     // var playlist = await page.$$eval('li.vjs-playlist-item', lis => {
@@ -56,8 +64,15 @@ const fileDownload = require('../helper/file-download');
     // console.log(playlist);
 
     for (var i = 0; i < musicUrls.length; i++) {
-        let result = await fileDownload.downloadFile(musicUrls[i], path.basename(decodeURI(musicUrls[i])));
-        if (!result) console("Failed to download at url " + musicUrls[i]);
+        console.log(`Downloading at url ${musicUrls[i]}`);
+
+        let result = await fileDownload.downloadFile(musicUrls[i], `${config.folder}/${path.basename(decodeURI(musicUrls[i]))}`)
+            .catch(err => {
+                console.log(err);
+                return false;
+            });
+
+        if (!result) console.log("Failed to download at url " + musicUrls[i]);
     }
 
     //await page.waitFor(10000);
