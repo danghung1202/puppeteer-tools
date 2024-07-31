@@ -45,5 +45,10 @@ var self = module.exports = {
             .click();
 
         await akamaiMenu.clickToItemInDropdown(page, fieldValue);
-    }
+    },
+
+    updateValueForRadioFieldInBehavior: async (page, behaviorName, fieldLabel, fieldValue, index = 1) => {
+        const xpathRadioBtn = `//pm-rule-editor/pm-behavior-list//pm-behavior[div[@class="header" and contains(string(), "${behaviorName}")]][${index}]//div[akam-form-label[contains(string(), "${fieldLabel}")]]/following-sibling::div//akam-radio-button[contains(string(), "${fieldValue}")]`
+        await page.locator('xpath=' + xpathRadioBtn).click();
+    },
 }

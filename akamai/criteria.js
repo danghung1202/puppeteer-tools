@@ -2,7 +2,7 @@ const puppeteer = require('puppeteer');
 const akamaiMenu = require('./menu');
 
 const setCriteriaName = async (page, criteriaName) => {
-    
+
     const xpathSelect = `//pm-rule-editor/pm-match-list//pm-match[last()]//akam-select`
     await page.locator('xpath=' + xpathSelect).setEnsureElementIsInTheViewport(false).click();
 
@@ -25,8 +25,16 @@ const setCriteriaValue = async (page, criteriaValue) => {
 
 var self = module.exports = {
 
-    checkHasExistedCriteria: async (page, criteriaName, criteriaCondition, criteriaValue) => {
-        return false;
+    checkHasExistedCriteria: async (page, criteriaName, criteriaCondition, criteriaVariableName = "") => {
+        if (criteriaName == "Variable") {
+            const xpathVariable = `//pm-rule-editor/pm-match-list//pm-match[div/akam-select[contains(string(), "Variable")] 
+            and div/form/pm-variable[contains(string(), "${criteriaVariableName}")] 
+            and div/form/pm-enum//akam-select[contains(string(), "${criteriaCondition}")]]`
+            return (await page.$('xpath=' + xpathVariable)) || false;
+        } else {
+            const xpathCriteria = `//pm-rule-editor/pm-match-list//pm-match[div/akam-select[contains(string(), "${criteriaName}")] and div/form/pm-enum//akam-select[contains(string(), "${criteriaCondition}")]]`
+            return (await page.$('xpath=' + xpathCriteria)) || false;
+        }
     },
 
     addNewCriteria: async (page, criteriaName, criteriaCondition, criteriaValue) => {
@@ -58,6 +66,13 @@ var self = module.exports = {
         }
     },
 
+    /**
+     * Add new value into criteria, the akamai will automatically check if the value has not existed yet then insert it
+     * @param {*} page 
+     * @param {*} criteriaName 
+     * @param {*} newCriteriaValue 
+     * @param {*} index 
+     */
     addValueToExistedCriteria: async (page, criteriaName, newCriteriaValue, index = 1) => {
         const xpathInput = `//pm-rule-editor/pm-match-list//pm-match//akam-select[contains(string(), "${criteriaName}")]/following-sibling::form//input[@akamfocusablehtmlelement]`
         await page.locator('xpath=' + xpathInput).fill(newCriteriaValue);

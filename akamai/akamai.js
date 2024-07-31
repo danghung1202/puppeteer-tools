@@ -43,8 +43,8 @@ module.exports = {
         await page.setCookie(...cookies);
 
         await page.setViewport({
-            width: 1280,
-            height: 800
+            width: 1400,
+            height: 900
         })
         await page.goto(url, {
             waitUntil: 'domcontentloaded'

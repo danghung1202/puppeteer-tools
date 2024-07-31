@@ -1,7 +1,6 @@
 const puppeteer = require('puppeteer');
 
-const path = require("path");
-const jsonIO = require('../helper/json-io')
+const log = require('./log');
 
 /**
  * When you are in Property page, you can get version number of staging/production
@@ -26,7 +25,10 @@ const getVersionNumberOfStagingOrProduction = async (page, environment) => {
  */
 const goToStagingOrProductionPropertyPage = async (page, environment) => {
     const xpathStaging = `//pm-active-version[@network="${environment}"]//pm-version-link//a`;
-    await page.locator('xpath=' + xpathStaging).click();
+    await page.locator('xpath=' + xpathStaging)
+        .on(puppeteer.LocatorEvent.Action, () => {
+            log.green(`Click to navigate the ${environment} version`)
+        }).click();
     await page.waitForNavigation();
 }
 
@@ -38,13 +40,14 @@ const goToStagingOrProductionPropertyPage = async (page, environment) => {
  */
 const clickToNewVersionBasedOnStagingOrProd = async (page, environment) => {
     const xpathNewVersion = `//pm-active-version[@network="${environment}"]//button[contains(text(), "New Version")]`
-    const button = await page.locator('xpath=' + xpathNewVersion).click();
+    await page.locator('xpath=' + xpathNewVersion)
+        .on(puppeteer.LocatorEvent.Action, () => {
+            log.green(`Click to create the new version based on ${environment} version`)
+        }).click();
     await page.waitForNavigation();
     //const xpathVersionMenu = '//pm-active-version[@network="STAGING"]//button[contains(text(), "New Version")]/following-sibling::button'
     //const buttonMenu = await page.locator('xpath=' + xpathVersionMenu).click();
 }
-
-
 
 module.exports = {
     goToPropertyPageByDomain: async (page, domain) => {
@@ -55,11 +58,15 @@ module.exports = {
 
             const searchItem = '//akamai-portal-search-result-category/div[contains(string(div), "www.' + domain + '")]//a';
 
-            await page.locator('xpath=' + searchItem).click();
+            await page.locator('xpath=' + searchItem)
+                .on(puppeteer.LocatorEvent.Action, () => {
+                    log.green(`Click to link contains ${domain}`)
+                }).click();
             await page.waitForNavigation();
+
             return true;
         } catch (error) {
-            console.error(`Can not find the Property by ${domain}: ${error}`);
+            log.red(`Can not find the Property by ${domain}: ${error}`);
             return false;
         }
     },
@@ -77,8 +84,7 @@ module.exports = {
         const xpath = `//pm-active-version[@network="STAGING"]//label[text()="Hostnames"]/following-sibling::div/div`;
         await page.locator('xpath=' + xpath).wait();
 
-        const hostnames = await page.$$eval('xpath=' + xpath, elements =>elements.map(e => e.innerText));
-        console.log(hostnames);
+        const hostnames = await page.$$eval('xpath=' + xpath, elements => elements.map(e => e.innerText));
         return hostnames;
     },
 
@@ -138,10 +144,16 @@ module.exports = {
         let hasDraftVersion = (await page.$('xpath=' + xpath)) || false;
         return hasDraftVersion;
     },
-    
+
     goToLatestDraftVersionBasedOnVersionNumber: async (page, baseVersionNumber) => {
+        const xpathVersion = `//td[contains(@class, "akam-column-basedOn") and contains(string(), "${baseVersionNumber}")]/preceding-sibling::td//span`
+        const versionName = await page.$eval('xpath=' + xpathVersion, el => el.innerText);
+
         const xpath = `//td[contains(@class, "akam-column-basedOn") and contains(string(), "${baseVersionNumber}")]/preceding-sibling::td//a`
-        await page.locator('xpath=' + xpath).click();
+        await page.locator('xpath=' + xpath)
+            .on(puppeteer.LocatorEvent.Action, () => {
+                log.green(`Click to the draft version number: '${versionName}'`)
+            }).click();
         await page.waitForNavigation();
     },
 

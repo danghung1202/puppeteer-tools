@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const akamaiMenu = require('./menu');
+const log = require('./log')
 
 const DEFAULT_RULE = 'Default Rule'
 var self = module.exports = {
@@ -26,7 +27,10 @@ var self = module.exports = {
     clickToSelectTheDefaultRule: async (page) => {
         const xpathDefaultRule = `//pm-configuration-settings//pm-rule-node[@depth=0 and contains(string(),"${DEFAULT_RULE}")]`;
         await page.locator('xpath=' + xpathDefaultRule).wait()
-        await page.locator('xpath=' + xpathDefaultRule).click()
+        await page.locator('xpath=' + xpathDefaultRule)
+            .on(puppeteer.LocatorEvent.Action, () => {
+                log.yellow(`Click to Default rule`)
+            }).click()
     },
 
     /**
@@ -90,7 +94,7 @@ var self = module.exports = {
      * @param {*} rules array of hierarchy rules, ex ['CACHING', 'Edge Cache', 'Cache ID modifier']
      */
     deleteTheSelectedRule: async (page, rules) => {
-        if(await self.clickToSelectTheRule(page, rules)) {
+        if (await self.clickToSelectTheRule(page, rules)) {
             await self.clickToMenuItemOfSelectedRule(page, "Delete");
 
             const okButton = `//akam-modal-container/div[@akammodalactions]/button[@akam-modal-close="ok"]`;
@@ -141,7 +145,7 @@ var self = module.exports = {
             }).click();
     },
 
-     /**
+    /**
      * When you selected the rule, you can add new rule from template that is after the selected rule
      * @param {*} page 
      * @param {*} ruleTemplateName 
@@ -149,8 +153,8 @@ var self = module.exports = {
     addNewRuleAfterSelectedRule: async (page, ruleTemplateName) => {
         await self.addNewRuleFromRuleTemplate(page, ruleTemplateName, "After Current Rule");
     },
-    
-     /**
+
+    /**
      * When you selected the rule, you can add new rule from template that is before the selected rule
      * @param {*} page 
      * @param {*} ruleTemplateName 
@@ -158,8 +162,8 @@ var self = module.exports = {
     addNewRuleBeforeSelectedRule: async (page, ruleTemplateName) => {
         await self.addNewRuleFromRuleTemplate(page, ruleTemplateName, "Before Current Rule");
     },
-    
-     /**
+
+    /**
      * When you selected the rule, you can add new rule from template that is child of the selected rule
      * @param {*} page 
      * @param {*} ruleTemplateName 

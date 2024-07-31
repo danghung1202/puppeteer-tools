@@ -4,7 +4,10 @@ module.exports = {
     readJson: (filePath) => {
         return fsPromise.readFile(filePath)
             .then(fileData => JSON.parse(fileData))
-            .catch(err => null)
+            .catch(err =>{ 
+                console.log(err);
+                return null;
+            })
     },
 
     writeJson: (filePath, jsonObject) => {
