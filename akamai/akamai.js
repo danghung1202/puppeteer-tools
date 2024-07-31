@@ -49,5 +49,18 @@ module.exports = {
         await page.goto(url, {
             waitUntil: 'domcontentloaded'
         })
+
+        page.on('dialog', async dialog => {
+            const message = dialog.message()
+            console.log(`The page show the dialog with message ${message}`);
+            if(message.includes('Any unsaved changes will be discarded')) {
+                console.log(`Clicking "Yes/Ok" to ${message}`);
+                await dialog.accept(); // press 'Yes'
+            } else {
+                console.log(`Clicking "No/Cancel" to ${message}`);
+                await dialog.dismiss(); // press 'No'
+            }
+        });
     }
+
 }

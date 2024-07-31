@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const akamaiMenu = require('./menu');
+const log = require('./log');
 
 const setCriteriaName = async (page, criteriaName) => {
 
@@ -20,7 +21,10 @@ const setCriteriaValue = async (page, criteriaValue) => {
     const xpathInput = `//pm-rule-editor/pm-match-list//pm-match[last()]//form//input[@akamfocusablehtmlelement and @type="text"]`
     await page.locator('xpath=' + xpathInput).setEnsureElementIsInTheViewport(false).click();
 
-    await page.locator('xpath=' + xpathInput).fill(criteriaValue);
+    await page.locator('xpath=' + xpathInput)
+        .on(puppeteer.LocatorEvent.Action, () => {
+            log.white(`Filled ${criteriaValue}`)
+        }).fill(criteriaValue);
 }
 
 var self = module.exports = {
@@ -50,6 +54,22 @@ var self = module.exports = {
         await setCriteriaValue(page, criteriaValue)
     },
 
+    getCriteriaValueByName: async (page, criteriaName, criteriaCondition, criteriaVariableName = "") => {
+        if (criteriaName == "Variable") {
+            const xpathVariable = `//pm-rule-editor/pm-match-list//pm-match[div/akam-select[contains(string(), "Variable")] 
+            and div/form/pm-variable[contains(string(), "${criteriaVariableName}")] 
+            and div/form/pm-enum//akam-select[contains(string(), "${criteriaCondition}")]]`
+            await page.locator('xpath=' + xpathVariable).wait();
+
+            return await page.$$eval('xpath=' + xpathVariable + '//form//akam-tag-input//akam-tag', elements => elements.map(e => e.innerText))
+        } else {
+            const xpathCriteria = `//pm-rule-editor/pm-match-list//pm-match[div/akam-select[contains(string(), "${criteriaName}")] and div/form/pm-enum//akam-select[contains(string(), "${criteriaCondition}")]]`
+            await page.locator('xpath=' + xpathCriteria).wait();
+
+            return await page.$$eval('xpath=' + xpathCriteria + '//form//akam-tag-input//akam-tag', elements => elements.map(e => e.innerText))
+        }
+    },
+
     /**
      * 
      * @param {*} page 
@@ -75,7 +95,11 @@ var self = module.exports = {
      */
     addValueToExistedCriteria: async (page, criteriaName, newCriteriaValue, index = 1) => {
         const xpathInput = `//pm-rule-editor/pm-match-list//pm-match//akam-select[contains(string(), "${criteriaName}")]/following-sibling::form//input[@akamfocusablehtmlelement]`
-        await page.locator('xpath=' + xpathInput).fill(newCriteriaValue);
+        await page.locator('xpath=' + xpathInput)
+            .on(puppeteer.LocatorEvent.Action, () => {
+                log.white(`Filled ${criteriaName}[${index}]: ${newCriteriaValue}`)
+            })
+            .fill(newCriteriaValue);
     }
 
 }

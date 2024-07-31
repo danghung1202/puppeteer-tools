@@ -1,5 +1,4 @@
 const puppeteer = require('puppeteer');
-
 const log = require('./log');
 
 /**
@@ -39,6 +38,14 @@ const goToStagingOrProductionPropertyPage = async (page, environment) => {
  * @returns 
  */
 const clickToNewVersionBasedOnStagingOrProd = async (page, environment) => {
+    await page.locator(`xpath=//pm-active-version[@network="${environment}"]//button[contains(text(), "New Version")]/following-sibling::button`)
+        .on(puppeteer.LocatorEvent.Action, () => {
+            log.green(`Click to button menu`)
+        })
+        .click()
+
+    await new Promise(r => setTimeout(r, 1000));
+    
     const xpathNewVersion = `//pm-active-version[@network="${environment}"]//button[contains(text(), "New Version")]`
     await page.locator('xpath=' + xpathNewVersion)
         .on(puppeteer.LocatorEvent.Action, () => {
@@ -60,7 +67,7 @@ module.exports = {
 
             await page.locator('xpath=' + searchItem)
                 .on(puppeteer.LocatorEvent.Action, () => {
-                    log.green(`Click to link contains ${domain}`)
+                    log.yellowBg(`Click to link contains ${domain}`)
                 }).click();
             await page.waitForNavigation();
 
@@ -159,8 +166,42 @@ module.exports = {
 
     updatePropertyNote: async (page, notes) => {
         const xpath = `//pm-version-info//akam-text-area/textarea`
-        await page.locator('xpath=' + xpath).fill(notes)
-    }
+        await page.locator('xpath=' + xpath)
+            .on(puppeteer.LocatorEvent.Action, () => {
+                log.white(`Fill the property note with value: ${notes}`)
+            }).fill(notes)
+    },
 
+    saveThePropertyChange: async (page) => {
+        await new Promise(r => setTimeout(r, 2000));
+
+        const versionName = await page.$eval('xpath=//pm-page-header//span[@pmpageheadersubtitle]', el => el.innerText);
+        await page.locator('xpath=//pm-page-header//span[@pmpageheadersubtitle]').click()
+
+        const xBtnSave = `//div[contains(@class,"edit-actions")]/button[text()="Save"]`; //[not(@disabled)]
+        const isDisabled = await page.$eval('xpath=' + xBtnSave, el => el.disabled)
+        if (!isDisabled) {
+            const [res] = await Promise.all([
+                page.waitForResponse(res => res.url().includes('pm-backend-blue/service/v1/properties/version')),
+                await page.locator('xpath=' + xBtnSave).on(puppeteer.LocatorEvent.Action, () => {
+                    log.white(`Click to Save the version: '${versionName}'`)
+                }).click()
+            ]);
+            const result = res ? (await res.json()).result : undefined;
+            if (result) {
+                if (result == "ERROR") {
+                    log.redBg(`Saved version ${versionName} successfully but has ERROR. Review the changes`);
+                } else {
+                    log.greenBg(`Saved version ${versionName} successfully with ${result}`);
+                }
+
+                return true;
+            }
+            return false;
+        } else {
+            log.red(`There is nothing change in the version ${versionName}. The "Save" button is disabled.`)
+            return false
+        }
+    }
 
 }

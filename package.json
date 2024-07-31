@@ -4,10 +4,9 @@
   "description": "**bold text**",
   "main": "test.js",
   "dependencies": {
-    "pending-xhr-puppeteer": "^2.0.0",
+    "puppeteer": "^22.12.1",
     "request": "^2.88.0"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

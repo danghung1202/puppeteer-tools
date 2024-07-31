@@ -172,5 +172,22 @@ var self = module.exports = {
         await self.addNewRuleFromRuleTemplate(page, ruleTemplateName, "Child Rule");
     },
 
+    /**
+     * Behind the sense, Akamai used the Angular framework to build the control panel. 
+     * 
+     * Sometime when you finished editing the selected rule then you click to other rule, the page can not detect the UI change. 
+     * 
+     * For workaround, you should click to the Rule Name header to notify the Angular framework that  there is the change and it should to trigger the render UI
+     * @param {*} page 
+     */
+    informAkamaiToFinishedEditingTheRule: async (page) => {
+        const xpathBtn = `//pm-rule-editor/div[@class="rule-name"]`;
+        const ruleName = await page.$eval('xpath=' + xpathBtn, el => el.innerText)
+
+        await page.locator('xpath=' + xpathBtn)
+            .on(puppeteer.LocatorEvent.Action, () => {
+                log.blue(`Finished editing the rule: ${ruleName}`);
+            }).click();
+    }
 
 }

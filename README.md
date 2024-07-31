@@ -1,3 +1,16 @@
+# How to run
+You must install puppeteer module. For support async/await, please make sure you are using the node 18.x or above
+```
+npm i puppeteer
+```
+To run the script, using the command.
+
+For example
+
+```
+node test-royalmint.js
+```
+
 # puppeteer-tools
 A list tools which make the developer's life happier, implement by puppeteer
 

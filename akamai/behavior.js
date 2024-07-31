@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const akamaiMenu = require('./menu');
+const log = require('./log');
 
 var self = module.exports = {
 
@@ -33,14 +34,18 @@ var self = module.exports = {
 
     updateValueForInputFieldInBehavior: async (page, behaviorName, fieldLabel, fieldValue, index = 1) => {
         const xpathInput = `//pm-rule-editor/pm-behavior-list//pm-behavior[div[@class="header" and contains(string(), "${behaviorName}")]][${index}]//div[akam-form-label[contains(string(), "${fieldLabel}")]]/following-sibling::div//input[@type="text"]`
-        await page.locator('xpath=' + xpathInput).fill(fieldValue);
+        await page.locator('xpath=' + xpathInput)
+            .on(puppeteer.LocatorEvent.Action, () => {
+                log.white(`Filled ${behaviorName}[${index}] -> ${fieldLabel}: ${fieldValue}`)
+            })
+            .fill(fieldValue);
     },
 
     updateValueForSelectFieldInBehavior: async (page, behaviorName, fieldLabel, fieldValue, index = 1) => {
         const xpathSelect = `//pm-rule-editor/pm-behavior-list//pm-behavior[div[@class="header" and contains(string(), "${behaviorName}")]][${index}]//div[akam-form-label[contains(string(), "${fieldLabel}")]]/following-sibling::div//akam-select//akam-input-action-icon`
         await page.locator('xpath=' + xpathSelect).setEnsureElementIsInTheViewport(false)
             .on(puppeteer.LocatorEvent.Action, () => {
-                console.log(`Click to select field in: ${behaviorName} ${fieldLabel}`)
+                console.log(`Click to select field in: ${behaviorName}[${index}] -> ${fieldLabel}`)
             })
             .click();
 
@@ -49,6 +54,9 @@ var self = module.exports = {
 
     updateValueForRadioFieldInBehavior: async (page, behaviorName, fieldLabel, fieldValue, index = 1) => {
         const xpathRadioBtn = `//pm-rule-editor/pm-behavior-list//pm-behavior[div[@class="header" and contains(string(), "${behaviorName}")]][${index}]//div[akam-form-label[contains(string(), "${fieldLabel}")]]/following-sibling::div//akam-radio-button[contains(string(), "${fieldValue}")]`
-        await page.locator('xpath=' + xpathRadioBtn).click();
+        await page.locator('xpath=' + xpathRadioBtn)
+            .on(puppeteer.LocatorEvent.Action, () => {
+                console.log(`Update the radio field in ${behaviorName}[${index}] -> ${fieldLabel}: ${fieldValue}`)
+            }).click();
     },
 }

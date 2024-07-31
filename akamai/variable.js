@@ -31,20 +31,30 @@ module.exports = {
         const indexOf = await getIndexOfVariableIfExisted(page, variableName)
         if (indexOf >= 0) {
             const xpathMatchInputValue = `//div[akam-content-panel-header[contains(string(), "Property Variables")]]/following-sibling::div//pm-version-variables//tbody/tr[${indexOf +1}]/td[2]//input`
-            await page.locator('xpath=' + xpathMatchInputValue).fill(variableValue);
+            await page.locator('xpath=' + xpathMatchInputValue)
+                .on(puppeteer.LocatorEvent.Action, () => {
+                    log.white(`Filled variable ${variableName} with value ${variableValue}`)
+                })
+                .fill(variableValue);
         } else {
 
             const xpath = `//akam-content-panel-header[contains(string(), "Property Variables")]//button[contains(string(), "Variables")]`;
             await page.locator('xpath=' + xpath)
-            .on(puppeteer.LocatorEvent.Action, () => {
-                log.yellow(`Click to Default rule`)
-            }).click();
+                .on(puppeteer.LocatorEvent.Action, () => {
+                    log.yellow(`Click to Default rule`)
+                }).click();
 
             const xpathNewInputName = `//div[akam-content-panel-header[contains(string(), "Property Variables")]]/following-sibling::div//pm-version-variables//tbody/tr[1]/td[1]//input`;
-            await page.locator('xpath=' + xpathNewInputName).fill(variableName);
+            await page.locator('xpath=' + xpathNewInputName)
+                .on(puppeteer.LocatorEvent.Action, () => {
+                    log.white(`Filled variable name ${variableName}`)
+                }).fill(variableName);
 
             const xpathNewInputValue = `//div[akam-content-panel-header[contains(string(), "Property Variables")]]/following-sibling::div//pm-version-variables//tbody/tr[1]/td[2]//input`;
-            await page.locator('xpath=' + xpathNewInputValue).fill(variableValue);
+            await page.locator('xpath=' + xpathNewInputValue)
+                .on(puppeteer.LocatorEvent.Action, () => {
+                    log.white(`Filled variable ${variableName} with value ${variableValue}`)
+                }).fill(variableValue);
         }
 
     }
