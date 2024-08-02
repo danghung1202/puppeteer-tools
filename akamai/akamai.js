@@ -49,7 +49,15 @@ module.exports = {
         await page.goto(url, {
             waitUntil: 'domcontentloaded'
         })
+    },
 
+    /**
+     * Accept the the dialog `Any unsaved changes will be discarded` when navigate to new page without click 'Save' button to save all changes in property
+     * 
+     * This method should be invoked only one after login successfully to akamai
+     * @param {*} page 
+     */
+    acceptTheUnsavedChangesDialogWhenNavigate: async (page) => {
         page.on('dialog', async dialog => {
             const message = dialog.message()
             console.log(`The page show the dialog with message ${message}`);
@@ -62,5 +70,4 @@ module.exports = {
             }
         });
     }
-
 }

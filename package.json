@@ -4,6 +4,7 @@
   "description": "**bold text**",
   "main": "test.js",
   "dependencies": {
+    "json2csv": "^6.0.0-alpha.2",
     "puppeteer": "^22.12.1",
     "request": "^2.88.0"
   },

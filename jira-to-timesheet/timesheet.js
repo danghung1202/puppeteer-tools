@@ -87,7 +87,7 @@ const jsonIO = require('../helper/json-io');
     const myTasks = await jsonIO.readJson('tasks.json');
 
     for (var i = 0; i < myTasks.length; i++) {
-        console.log(myTasks[i].summary);
+        console.log(`${myTasks[i].issueKey} ${myTasks[i].summary}`);
         await page.evaluate((task) => {
             var swTasks = document.querySelectorAll('#dialog-workinghour .editor-form select')[1];
             swTasks.querySelector('option[value="5c179adc-ec0f-41ad-bfa9-1ba99f3320f9"]').selected = true;

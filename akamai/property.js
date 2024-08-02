@@ -45,7 +45,7 @@ const clickToNewVersionBasedOnStagingOrProd = async (page, environment) => {
         .click()
 
     await new Promise(r => setTimeout(r, 1000));
-    
+
     const xpathNewVersion = `//pm-active-version[@network="${environment}"]//button[contains(text(), "New Version")]`
     await page.locator('xpath=' + xpathNewVersion)
         .on(puppeteer.LocatorEvent.Action, () => {
@@ -141,7 +141,7 @@ module.exports = {
     },
 
     /**
-     * When you are in Property page, you can check if there has a inactive version based on other version number
+     * When you are in Property page, you can check if there has a draft version based on other version number
      * @param {*} page The Puppeteer's page object
      * @param {*} baseVersionNumber The base version number, ex 'Version 40'
      * @returns 
@@ -172,6 +172,11 @@ module.exports = {
             }).fill(notes)
     },
 
+    /**
+     * When you are in Property details page, you can click to 'Save' button to save all changes
+     * @param {*} page 
+     * @returns 
+     */
     saveThePropertyChange: async (page) => {
         await new Promise(r => setTimeout(r, 2000));
 
@@ -201,6 +206,27 @@ module.exports = {
         } else {
             log.red(`There is nothing change in the version ${versionName}. The "Save" button is disabled.`)
             return false
+        }
+    },
+
+    /**
+     * Get the information of property by version number
+     * @param {*} page 
+     * @param {*} versionNumber 
+     * @returns json object of `{version, lastEdited, author, notes}`
+     */
+    getSummaryOfPropertyVersion: async (page, versionNumber) => {
+        const xpathTr = `//table//tr[td[contains(@class, "akam-column-version")  and contains(string(), "${versionNumber}")]]`
+        await page.locator('xpath=' + xpathTr).wait()
+        const lastEdited = await page.$eval(`xpath=${xpathTr}/td[contains(@class,"akam-column-lastEdited")]`, el => el.innerText)
+        const author = await page.$eval(`xpath=${xpathTr}/td[contains(@class,"akam-column-lastEditedByUser")]`, el => el.innerText)
+        const notes = await page.$eval(`xpath=${xpathTr}/td[contains(@class,"akam-column-notes")]`, el => el.innerText)
+
+        return {
+            version : versionNumber,
+            lastEdited,
+            author,
+            notes
         }
     }
 

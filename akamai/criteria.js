@@ -71,7 +71,9 @@ var self = module.exports = {
     },
 
     /**
+     * Delete all values in criteria by click 'Close' icon in each tag
      * 
+     * Note: This method sometime don't work well. 
      * @param {*} page 
      * @param {*} criteriaName The criteria's name such as `Hostname`, `Path` etc..
      * @param {*} index 
