@@ -13,7 +13,7 @@ var self = module.exports = {
         const xpathBtn = `//pm-rule-editor/pm-behavior-list//akam-content-panel-header[contains(string(), "Behaviors")]//button`
         await page.locator('xpath=' + xpathBtn)
             .on(puppeteer.LocatorEvent.Action, () => {
-                console.log(`Click to '+Behavior' button to add new behavior`)
+                log.white(`Click to '+Behavior' button to add new behavior`)
             }).click()
 
         await akamaiMenu.clickToMenuItemInAkamMenu(page, "Standard property behavior")
@@ -21,15 +21,21 @@ var self = module.exports = {
         const selectedRule = `//pm-add-behavior-modal//div[@class="add-behavior-modal-sidebar-body"]//ul/li[contains(text(), "${behaviorName}")]`
         await page.locator('xpath=' + selectedRule)
             .on(puppeteer.LocatorEvent.Action, () => {
-                console.log(`Select  the '${behaviorName}' from behavior template`)
+                log.white(`Select  the '${behaviorName}' from behavior template`)
             }).click();
 
         const insertBtn = `//div[@akammodalactions]/button[contains(text(), "Insert Behavior")]`
         await page.locator('xpath=' + insertBtn)
             .on(puppeteer.LocatorEvent.Action, () => {
-                console.log(`Click to 'Insert Behavior' to save new behavior`)
+                log.white(`Click to 'Insert Behavior' to save new behavior`)
             }).click();
 
+    },
+
+    getValueOfInputFieldInBehavior: async (page, behaviorName, fieldLabel, index = 1) => {
+        const xpathInput = `//pm-rule-editor/pm-behavior-list//pm-behavior[div[@class="header" and contains(string(), "${behaviorName}")]][${index}]//div[akam-form-label[contains(string(), "${fieldLabel}")]]/following-sibling::div`
+        await page.locator('xpath=' + xpathInput).wait()
+        return await page.$eval('xpath=' + xpathInput, el => el.innerText)
     },
 
     updateValueForInputFieldInBehavior: async (page, behaviorName, fieldLabel, fieldValue, index = 1) => {
@@ -45,7 +51,7 @@ var self = module.exports = {
         const xpathSelect = `//pm-rule-editor/pm-behavior-list//pm-behavior[div[@class="header" and contains(string(), "${behaviorName}")]][${index}]//div[akam-form-label[contains(string(), "${fieldLabel}")]]/following-sibling::div//akam-select//akam-input-action-icon`
         await page.locator('xpath=' + xpathSelect).setEnsureElementIsInTheViewport(false)
             .on(puppeteer.LocatorEvent.Action, () => {
-                console.log(`Click to select field in: ${behaviorName}[${index}] -> ${fieldLabel}`)
+                log.white(`Click to select field in: ${behaviorName}[${index}] -> ${fieldLabel}`)
             })
             .click();
 
@@ -56,7 +62,7 @@ var self = module.exports = {
         const xpathRadioBtn = `//pm-rule-editor/pm-behavior-list//pm-behavior[div[@class="header" and contains(string(), "${behaviorName}")]][${index}]//div[akam-form-label[contains(string(), "${fieldLabel}")]]/following-sibling::div//akam-radio-button[contains(string(), "${fieldValue}")]`
         await page.locator('xpath=' + xpathRadioBtn)
             .on(puppeteer.LocatorEvent.Action, () => {
-                console.log(`Update the radio field in ${behaviorName}[${index}] -> ${fieldLabel}: ${fieldValue}`)
+                log.white(`Update the radio field in ${behaviorName}[${index}] -> ${fieldLabel}: ${fieldValue}`)
             }).click();
     },
 }

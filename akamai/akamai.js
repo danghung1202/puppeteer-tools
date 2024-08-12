@@ -6,6 +6,8 @@ const Behavior = require('./behavior');
 const Criteria = require('./criteria');
 const Menu = require('./menu');
 const Property = require('./property');
+const Cloudlets = require('./cloudlets');
+const log = require('./log');
 
 module.exports = {
     Property,
@@ -14,7 +16,7 @@ module.exports = {
     Criteria,
     Behavior,
     Menu,
-
+    Cloudlets,
     /**
      * Login to akamai home page using the cookies
      * @param {*} page 
@@ -60,12 +62,12 @@ module.exports = {
     acceptTheUnsavedChangesDialogWhenNavigate: async (page) => {
         page.on('dialog', async dialog => {
             const message = dialog.message()
-            console.log(`The page show the dialog with message ${message}`);
+            log.white(`The page show the dialog with message ${message}`);
             if(message.includes('Any unsaved changes will be discarded')) {
-                console.log(`Clicking "Yes/Ok" to ${message}`);
+                log.white(`Clicking "Yes/Ok" to ${message}`);
                 await dialog.accept(); // press 'Yes'
             } else {
-                console.log(`Clicking "No/Cancel" to ${message}`);
+                log.white(`Clicking "No/Cancel" to ${message}`);
                 await dialog.dismiss(); // press 'No'
             }
         });

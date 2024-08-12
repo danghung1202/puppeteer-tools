@@ -38,13 +38,13 @@ const goToStagingOrProductionPropertyPage = async (page, environment) => {
  * @returns 
  */
 const clickToNewVersionBasedOnStagingOrProd = async (page, environment) => {
-    await page.locator(`xpath=//pm-active-version[@network="${environment}"]//button[contains(text(), "New Version")]/following-sibling::button`)
-        .on(puppeteer.LocatorEvent.Action, () => {
-            log.green(`Click to button menu`)
-        })
-        .click()
+    // await page.locator(`xpath=//pm-active-version[@network="${environment}"]//button[contains(text(), "New Version")]/following-sibling::button`)
+    //     .on(puppeteer.LocatorEvent.Action, () => {
+    //         log.green(`Click to button menu`)
+    //     })
+    //     .click()
 
-    await new Promise(r => setTimeout(r, 1000));
+    // await new Promise(r => setTimeout(r, 1000));
 
     const xpathNewVersion = `//pm-active-version[@network="${environment}"]//button[contains(text(), "New Version")]`
     await page.locator('xpath=' + xpathNewVersion)
@@ -63,6 +63,7 @@ module.exports = {
 
             await page.locator('xpath=' + searchInput).fill(domain);
 
+            
             const searchItem = '//akamai-portal-search-result-category/div[contains(string(div), "www.' + domain + '")]//a';
 
             await page.locator('xpath=' + searchItem)
@@ -70,12 +71,27 @@ module.exports = {
                     log.yellowBg(`Click to link contains ${domain}`)
                 }).click();
             await page.waitForNavigation();
+            //click 'escape' to close the search suggestion result
+            await page.keyboard.press('Escape')
 
             return true;
         } catch (error) {
             log.red(`Can not find the Property by ${domain}: ${error}`);
             return false;
         }
+    },
+
+    goToPropertyByVersionNumber: async (page, versionNumber) => {
+        //sometime click to property detail link is not work. This is workaround
+        await new Promise(r => setTimeout(r, 1000));
+        await page.locator('xpath=//pm-page-header//div[@pmpageheadersubtitle]').click()
+
+        const xpath = `//tr/td[contains(@class, "akam-column-version") and contains(string(), "${versionNumber}")]//a`
+        await page.locator('xpath=' + xpath)
+            .on(puppeteer.LocatorEvent.Action, () => {
+                log.green(`Click to navigate the property ${versionNumber}`)
+            }).click();
+        await page.waitForNavigation();
     },
 
     /**
@@ -147,16 +163,17 @@ module.exports = {
      * @returns 
      */
     checkHasDraftVersionBasedOnOtherVersionNumber: async (page, baseVersionNumber) => {
-        const xpath = `//td[contains(@class, "akam-column-basedOn") and contains(string(), "${baseVersionNumber}")]/preceding-sibling::td//a`
+        const xpath = `//tr[td[contains(@class, "akam-column-basedOn") and contains(string(), "${baseVersionNumber}")] and td[contains(@class, "akam-column-stagingStatus") and contains(string(), "Inactive")]]/td[contains(@class, "akam-column-version")]//a`
         let hasDraftVersion = (await page.$('xpath=' + xpath)) || false;
         return hasDraftVersion;
     },
 
     goToLatestDraftVersionBasedOnVersionNumber: async (page, baseVersionNumber) => {
-        const xpathVersion = `//td[contains(@class, "akam-column-basedOn") and contains(string(), "${baseVersionNumber}")]/preceding-sibling::td//span`
+        const matchTr = `//tr[td[contains(@class, "akam-column-basedOn") and contains(string(), "${baseVersionNumber}")] and td[contains(@class, "akam-column-stagingStatus") and contains(string(), "Inactive")]]/td[contains(@class, "akam-column-version")]`
+        const xpathVersion = `${matchTr}//span`
         const versionName = await page.$eval('xpath=' + xpathVersion, el => el.innerText);
 
-        const xpath = `//td[contains(@class, "akam-column-basedOn") and contains(string(), "${baseVersionNumber}")]/preceding-sibling::td//a`
+        const xpath = `${matchTr}//a`
         await page.locator('xpath=' + xpath)
             .on(puppeteer.LocatorEvent.Action, () => {
                 log.green(`Click to the draft version number: '${versionName}'`)
@@ -175,10 +192,10 @@ module.exports = {
     /**
      * When you are in Property details page, you can click to 'Save' button to save all changes
      * @param {*} page 
-     * @returns 
+     * @returns the version number if save successfully, otherwise return false
      */
     saveThePropertyChange: async (page) => {
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(r => setTimeout(r, 1000));
 
         const versionName = await page.$eval('xpath=//pm-page-header//span[@pmpageheadersubtitle]', el => el.innerText);
         await page.locator('xpath=//pm-page-header//span[@pmpageheadersubtitle]').click()
@@ -187,12 +204,13 @@ module.exports = {
         const isDisabled = await page.$eval('xpath=' + xBtnSave, el => el.disabled)
         if (!isDisabled) {
             const [res] = await Promise.all([
-                page.waitForResponse(res => res.url().includes('pm-backend-blue/service/v1/properties/version')),
+                page.waitForResponse(res => res.url().includes('/service/v1/properties/version')),
                 await page.locator('xpath=' + xBtnSave).on(puppeteer.LocatorEvent.Action, () => {
                     log.white(`Click to Save the version: '${versionName}'`)
                 }).click()
             ]);
-            const result = res ? (await res.json()).result : undefined;
+            const response = res ? await res.json() : undefined;
+            const result = response ? response.result : undefined;
             if (result) {
                 if (result == "ERROR") {
                     log.redBg(`Saved version ${versionName} successfully but has ERROR. Review the changes`);
@@ -200,7 +218,8 @@ module.exports = {
                     log.greenBg(`Saved version ${versionName} successfully with ${result}`);
                 }
 
-                return true;
+                const versionNumbers = versionName.split(" ")
+                return versionNumbers[1];
             }
             return false;
         } else {
@@ -223,11 +242,49 @@ module.exports = {
         const notes = await page.$eval(`xpath=${xpathTr}/td[contains(@class,"akam-column-notes")]`, el => el.innerText)
 
         return {
-            version : versionNumber,
+            version: versionNumber,
             lastEdited,
             author,
             notes
         }
+    },
+
+    activePropertyOnStaging: async (page) => {
+        await page.waitForSelector('xpath=//pm-page-header//span[@pmpageheadersubtitle]');
+        const versionName = await page.$eval('xpath=//pm-page-header//span[@pmpageheadersubtitle]', el => el.innerText);
+
+        const xActive = `xpath=//akam-tabs//ul/li[contains(string(), "Activate")]`
+        await page.locator(xActive).click()
+
+        const testBtn = `xpath=//pm-app-test-center-button[@network="STAGING"]//button`
+        await page.locator(testBtn).wait();
+
+        const xActiveBtn = `xpath=//pm-activation-control[@network="STAGING"]//button[contains(string(), "Activate")]`
+        let hasActiveBtn = (await page.$(xActiveBtn)) || false;
+        if (!hasActiveBtn) {
+            log.white(`The version: '${versionName}' has been activated on Staging`)
+            return false;
+        }
+        await page.locator(xActiveBtn).click();
+
+        const detailVersion = `xpath=//pm-activation-modal//pm-compliance//label[@for="notes"]`
+        await page.locator(detailVersion).setTimeout(30000).wait();
+
+        const publishToStaging = `xpath=//div[@class="akam-modal-actions"]/button[contains(string(), "Activate ")]`
+        const [res] = await Promise.all([
+            page.waitForResponse(res => res.url().includes('/service/v1/properties/activate')),
+            await page.locator(publishToStaging).on(puppeteer.LocatorEvent.Action, () => {
+                log.white(`Click to Activate the version: '${versionName}'`)
+            }).click()
+        ]);
+
+        const response = res ? await res.json() : undefined;
+        if (response) {
+            log.greenBg(`Activating the version: '${versionName}' successfully`)
+            return true;
+        }
+        log.redBg(`Can not activating the version: '${versionName}'`)
+        return false
     }
 
 }

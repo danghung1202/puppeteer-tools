@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const log = require('./log');
 
 module.exports = {
     /**
@@ -11,7 +12,7 @@ module.exports = {
         await page.locator('xpath=' + menuItem)
             .setEnsureElementIsInTheViewport(false)
             .on(puppeteer.LocatorEvent.Action, () => {
-                console.log(`Click to menu item ${menuItemText} in menu`)
+                log.white(`Click to menu item ${menuItemText} in menu`)
             })
             .click();
     },
@@ -25,8 +26,10 @@ module.exports = {
         const matchItemPath = `//ul/li[@akammenuoption and contains(string(),"${dropdownItemText}")]`
         await page.locator('xpath=' + matchItemPath)
             .on(puppeteer.LocatorEvent.Action, () => {
-                console.log(`Click to item ${dropdownItemText} in dropdown`)
+                log.white(`Click to item ${dropdownItemText} in dropdown`)
             })
             .click();
     }
+
+    
 }

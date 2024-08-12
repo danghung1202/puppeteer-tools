@@ -44,7 +44,7 @@ var self = module.exports = {
     clickToSelectTheRule: async (page, rules) => {
         const hasTheRule = await self.checkIfHasTheRule(page, rules);
         if (!hasTheRule) {
-            console.log(`\x1b[31m The rule ${rules.join(' -> ')} is not found! \x1b[0m`)
+            log.white(`The rule ${rules.join(' -> ')} is not found!`)
             return false;
         }
 
@@ -59,7 +59,7 @@ var self = module.exports = {
             //.setWaitForEnabled(false)
             //.setWaitForStableBoundingBox(false)
             .on(puppeteer.LocatorEvent.Action, () => {
-                console.log(`\x1b[33m Click to rule: ${rules.join(' -> ')} \x1b[0m`)
+                log.white(`Click to rule: ${rules.join(' -> ')}`)
             })
             .click();
         return true
@@ -81,7 +81,7 @@ var self = module.exports = {
         await page.locator('xpath=' + menu)
             .setEnsureElementIsInTheViewport(false)
             .on(puppeteer.LocatorEvent.Action, () => {
-                console.log(`Click to menu icon of selected rule`)
+                log.white(`Click to menu icon of selected rule`)
             })
             .click();
 
@@ -100,11 +100,13 @@ var self = module.exports = {
             const okButton = `//akam-modal-container/div[@akammodalactions]/button[@akam-modal-close="ok"]`;
             await page.locator('xpath=' + okButton)
                 .on(puppeteer.LocatorEvent.Action, () => {
-                    console.log(`Click to 'OK' button to delete the ${rules.join(' -> ')}`)
+                    log.white(`Click to 'OK' button to delete the ${rules.join(' -> ')}`)
                 })
                 .click();
+            return true;
         } else {
-            console.log(`Can not delete the ${rules.join(' -> ')}. The rule may not found`)
+            log.white(`Can not delete the ${rules.join(' -> ')}. The rule may not found`)
+            return false
         }
     },
 
@@ -119,7 +121,7 @@ var self = module.exports = {
         const xpath = `//pm-configuration-settings//button[contains(string(), "Rules")]/following-sibling::button`;
         await page.locator('xpath=' + xpath)
             .on(puppeteer.LocatorEvent.Action, () => {
-                console.log(`Click to '+ Rules' button`)
+                log.white(`Click to '+ Rules' button`)
             }).click();
 
         await akamaiMenu.clickToMenuItemInAkamMenu(page, position)
@@ -127,7 +129,7 @@ var self = module.exports = {
         const selectCategory = `//pm-add-rule-modal//akam-select[@formcontrolname="searchCategory"]`
         await page.locator('xpath=' + selectCategory)
             .on(puppeteer.LocatorEvent.Action, () => {
-                console.log(`Open the the dropdown 'searchCategory'`)
+                log.white(`Open the the dropdown 'searchCategory'`)
             }).click();
 
         await akamaiMenu.clickToItemInDropdown(page, "All");
@@ -135,13 +137,13 @@ var self = module.exports = {
         const selectedRule = `//pm-add-rule-modal//div[@class="add-rule-modal-sidebar-body"]//ul/li[contains(text(), "${ruleTemplateName}")]`
         await page.locator('xpath=' + selectedRule)
             .on(puppeteer.LocatorEvent.Action, () => {
-                console.log(`Choose the '${ruleTemplateName}' template rule`)
+                log.white(`Choose the '${ruleTemplateName}' template rule`)
             }).click();
 
         const insertBtn = `//div[@akammodalactions]/button[contains(text(), "Insert Rule")]`
         await page.locator('xpath=' + insertBtn)
             .on(puppeteer.LocatorEvent.Action, () => {
-                console.log(`Click to 'Insert Rule' to insert new rule`)
+                log.white(`Click to 'Insert Rule' to insert new rule`)
             }).click();
     },
 

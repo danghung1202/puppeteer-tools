@@ -45,7 +45,7 @@ var self = module.exports = {
         const xpathBtn = `//pm-rule-editor/pm-match-list//akam-content-panel-header[contains(string(), "Criteria")]//button`
         await page.locator('xpath=' + xpathBtn).setEnsureElementIsInTheViewport(false)
             .on(puppeteer.LocatorEvent.Action, () => {
-                console.log(`Add new criteria: ${criteriaName} ${criteriaCondition} ${criteriaValue}`)
+                log.white(`Add new criteria: ${criteriaName} ${criteriaCondition} ${criteriaValue}`)
             })
             .click();
 
